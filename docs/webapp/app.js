@@ -88,46 +88,42 @@
     }
   }
 
-  function isProbablyHTML(str) {
-    // очень простая эвристика: есть тэги или HTML-сущности
-    return /<\/?[a-z][\s\S]*>/i.test(str) || /&[a-z]+;/.test(str);
+  function setAnswer(content) {
+    // чистим контейнер (если кликнут повторно — ничего не сломается)
+    answerContainer.innerHTML = '';
+
+    // делаем содержимое «как у подсказки»: обычный HTML, рендер MathJax
+    const div = document.createElement('div');
+    div.className = 'step';     // тот же стиль, что и у подсказок
+    div.innerHTML = content;    // если у вас текст, можно обернуть в <p> или экранировать
+    answerContainer.appendChild(div);
+
+    if (window.MathJax?.typesetPromise) {
+      window.MathJax.typesetPromise([answerContainer]).catch(console.error);
+    }
   }
 
+  let answerShown = false;
   function showAnswer() {
-    if (!answerCard.style.display || answerCard.style.display === 'none') {
-      answerCard.style.display = 'block';
+    if (answerShown) return;
 
-      if (Array.isArray(answer)) {
-        // если ответ пришёл массивом строк — склеим с переносами
-        answer = answer.join('\n');
-      }
+    // поддержка массива ответа
+    let rendered = answer;
+    if (Array.isArray(rendered)) rendered = rendered.join('<br/>');
+    if (typeof rendered !== 'string') rendered = String(rendered ?? '');
 
-      if (typeof answer !== 'string') {
-        answer = String(answer ?? '');
-      }
+    setAnswer(rendered);
 
-      // 1) если это HTML — вставляем как HTML
-      if (isProbablyHTML(answer)) {
-        answerContainer.innerHTML = answer;
-      } else {
-        // 2) если это обычный текст — сохраняем переносы и даём MathJax’у распознать $…$
-        answerContainer.textContent = answer;
-        // переносы строк → не схлопывать
-        answerContainer.style.whiteSpace = 'pre-wrap';
-      }
+    answerCard.style.display = 'block';
+    answerShown = true;
+    answerBtn.disabled = true;
+    answerBtn.textContent = 'Ответ показан';
 
-      // Прогоняем типсет (и для текста, и для HTML)
-      if (window.MathJax?.typesetPromise) {
-        window.MathJax.typesetPromise([answerContainer]).catch(console.error);
-      }
-
-      // отправим событие обратно боту
-      if (tg) {
-        tg.sendData(JSON.stringify({
-          action: 'show_answer',
-          original_message_id: payload?.original_message_id
-        }));
-      }
+    if (tg) {
+      tg.sendData(JSON.stringify({
+        action: 'show_answer',
+        original_message_id: payload?.original_message_id
+      }));
     }
   }
 
