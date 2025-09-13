@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <title>Пошаговое решение</title>
+
+  <!-- Telegram WebApp SDK -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+  <!-- MathJax (TeX input, SVG output) -->
+  <script>
+    window.MathJax = {
+      tex: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+      svg: { fontCache: 'global' }
+    };
+  </script>
+  <script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+  <style>
+    :root {
+      --bg: var(--tg-theme-bg-color, #0f0f0f);
+      --text: var(--tg-theme-text-color, #ffffff);
+      --hint: var(--tg-theme-hint-color, #a0a0a0);
+      --btn: var(--tg-theme-button-color, #2ea6ff);
+      --btn-text: var(--tg-theme-button-text-color, #ffffff);
+      --secondary-bg: var(--tg-theme-secondary-bg-color, #1a1a1a);
+    }
+    body {
+      margin: 0; padding: 16px;
+      background: var(--bg); color: var(--text);
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+    }
+    .card {
+      background: var(--secondary-bg);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,.2);
+    }
+    h1 { font-size: 18px; margin: 0 0 8px; }
+    .step { margin: 8px 0; line-height: 1.5; }
+    .controls {
+      display: grid; gap: 12px; grid-template-columns: 1fr;
+      position: sticky; bottom: 0; background: var(--bg); padding-top: 8px;
+    }
+    button {
+      width: 100%;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 16px;
+      background: var(--btn);
+      color: var(--btn-text);
+      font-weight: 600;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button.secondary { background: #333; color: #fff; }
+    .muted { color: var(--hint); font-size: 13px; }
+    .answer { padding: 12px; border-radius: 10px; background: #222; margin-top: 8px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Пошаговое решение</h1>
+    <div id="status" class="muted">Готово к показу подсказок.</div>
+  </div>
+
+  <div class="card" id="stepsCard">
+    <div id="stepsContainer"></div>
+  </div>
+
+  <div class="card" id="answerCard" style="display:none;">
+    <div class="answer" id="answerContainer"></div>
+  </div>
+
+  <div class="controls">
+    <button id="nextBtn">Следующая подсказка</button>
+    <button id="answerBtn" class="secondary">Узнать ответ</button>
+    <button id="cancelBtn" class="secondary">Отменить решение</button>
+  </div>
+
+  <script src="./app.js"></script>
+</body>
+</html>
