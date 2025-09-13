@@ -5,15 +5,33 @@
   }
 
   // --- helpers ---
+  function addBase64Padding(s) {
+    const pad = s.length % 4;
+    return pad ? s + "====".slice(pad) : s;
+  }
+
+  function base64UrlToBytes(s) {
+    // URL-safe -> обычный base64
+    const b64 = addBase64Padding(s.replace(/-/g, '+').replace(/_/g, '/'));
+    // atob -> строка в Latin-1 c кодами байт 0..255
+    const bin = atob(b64);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return bytes;
+  }
+
   function decodePayload(encoded) {
     try {
-      const json = atob(encoded.replace(/-/g, '+').replace(/_/g, '/'));
-      return JSON.parse(json);
+      const bytes = base64UrlToBytes(encoded);
+      // корректно собираем UTF-8
+      const text = new TextDecoder('utf-8').decode(bytes);
+      return JSON.parse(text);
     } catch (e) {
       console.error('Failed to decode payload', e);
       return null;
     }
   }
+
 
   // Получаем ?data=...
   const params = new URLSearchParams(window.location.search);
