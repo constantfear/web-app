@@ -88,11 +88,40 @@
     }
   }
 
+  function isProbablyHTML(str) {
+    // очень простая эвристика: есть тэги или HTML-сущности
+    return /<\/?[a-z][\s\S]*>/i.test(str) || /&[a-z]+;/.test(str);
+  }
+
   function showAnswer() {
     if (!answerCard.style.display || answerCard.style.display === 'none') {
       answerCard.style.display = 'block';
-      answerContainer.innerHTML = answer;
-      renderMath(answerContainer);
+
+      if (Array.isArray(answer)) {
+        // если ответ пришёл массивом строк — склеим с переносами
+        answer = answer.join('\n');
+      }
+
+      if (typeof answer !== 'string') {
+        answer = String(answer ?? '');
+      }
+
+      // 1) если это HTML — вставляем как HTML
+      if (isProbablyHTML(answer)) {
+        answerContainer.innerHTML = answer;
+      } else {
+        // 2) если это обычный текст — сохраняем переносы и даём MathJax’у распознать $…$
+        answerContainer.textContent = answer;
+        // переносы строк → не схлопывать
+        answerContainer.style.whiteSpace = 'pre-wrap';
+      }
+
+      // Прогоняем типсет (и для текста, и для HTML)
+      if (window.MathJax?.typesetPromise) {
+        window.MathJax.typesetPromise([answerContainer]).catch(console.error);
+      }
+
+      // отправим событие обратно боту
       if (tg) {
         tg.sendData(JSON.stringify({
           action: 'show_answer',
